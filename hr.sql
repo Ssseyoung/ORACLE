@@ -2150,7 +2150,192 @@ FROM (
                         salary
                         FOR job_code IN ( J1, J2, J3, J4, J5, J6, J7 )
                       )
-;        
+; 
+
+
+-- 기타 함수
+-- GREATEST ( )
+-- LEAST ( )
+-- 인자 : 표현식
+SELECT GREATEST ( 1, 2, 3, 4, 5 ) "가장 큰 값"
+         ,LEAST ( 1, 2, 3, 4, 5 ) "가장 작은 값"
+FROM dual;
+
+SELECT GREATEST ( '김휴먼', '박휴먼', '홍휴먼' ) "사준 순 마지막"
+         ,LEAST ( '김휴먼', '박휴먼', '홍휴먼' ) "사준 순 처음"
+FROM dual;
+
+
+-- 조인
+-- * 내부 조인
+-- 동등 조인
+SELECT e.employee_id
+         ,e.first_name
+         ,d.department_id
+         ,d.department_name
+FROM employees e
+        ,departments d
+WHERE e.department_id = d.department_id;
+
+-- 세미 조인
+-- EXISTS 사용
+SELECT department_id, department_name
+FROM departments d
+WHERE EXISTS ( SELECT *
+                     FROM employees e
+                     WHERE e.department_id = d.department_id
+                     AND e.salary > 3000 )
+ORDER BY d.department_name;
+
+-- IN 사용
+SELECT department_id, department_name
+FROM departments d
+WHERE d.department_id IN ( SELECT e.department_id
+                                    FROM employees e
+                                    WHERE e.salary > 3000 )
+ORDER BY d.department_name
+;
+
+-- 안티 조인
+-- NOT EXISTS 사용
+SELECT department_id, department_name
+FROM departments d
+WHERE NOT EXISTS ( SELECT *
+                            FROM employees e
+                            WHERE e.department_id = d.department_id
+                             AND e.salary > 3000 )
+ORDER BY d.department_name;
+
+-- IN 사용
+SELECT e.employee_id
+         ,e.first_name
+         ,d.department_id
+         ,d.department_name
+FROM employees e
+        ,departments d
+WHERE e.department_id = d.department_id
+AND e.department_id NOT IN (
+                                        SELECT department_id
+                                        FROM departments
+                                        WHERE manager_id IS NULL )
+; 
+
+-- 셀프 조인
+-- 사원과 관리자를 함께 조회하시오
+SELECT a.employee_id 사원번호
+         ,a.first_name 사원명
+         ,b.employee_id 관리자번호
+         ,b.first_name 관리자명
+         ,a.department_id 부서번호
+FROM employees a,
+         employees b
+WHERE a.employee_id = b.employee_id
+AND a.department_id = b.department_id
+;
+
+-- 외부 조인
+-- (+)
+-- : 조인 조건에서 데이터가 없는 (NULL) 테이블의 컬럼에 기호를 붙여준다.
+SELECT e.emp_id
+         ,e.emp_name
+         ,d.dept_id
+         ,d.dept_title
+FROM employee e
+        ,department d
+WHERE e.dept_code = d.dept_id (+)
+;
+
+-- ANSI
+SELECT e.emp_id
+         ,e.emp_name
+         ,d.dept_id
+         ,d.dept_title
+FROM employee e LEFT OUTER JOIN department d -- OUTER 생략가능
+                        ON e.dept_code = d.dept_id
+;                        
+
+-- RIGHT OUTER JOIN
+-- (+)
+-- : 조인 조건에서 데이터가 없는 (NULL) 테이블의 컬럼에 기호를 붙여준다.
+SELECT e.emp_id
+         ,e.emp_name
+         ,d.dept_id
+         ,d.dept_title
+FROM employee e
+        ,department d
+WHERE e.dept_code(+) = d.dept_id
+;
+
+-- ANSI
+SELECT e.emp_id
+         ,e.emp_name
+         ,d.dept_id
+         ,d.dept_title
+FROM employee e RIGHT OUTER JOIN department d -- OUTER 생략가능
+                        ON e.dept_code = d.dept_id
+;       
+
+-- 외부 조인 유의사항
+-- * 두 테이블의 조인 조건이 되는 공통 컬럼에 모두 (+) 기호를 붙여야한다
+-- ex) 공통컬럼 : employee_id, department_id
+SELECT e.employee_id
+         ,e.first_name
+         ,j.job_id
+         ,j.department_id
+FROM employees e
+        ,job_history j
+WHERE e.employee_id = j.employee_id(+)
+AND e.department_id = j.department_id(+)
+;
+
+SELECT * FROM employees;
+SELECT * FROM job_history;
+SELECT COUNT(*) FROM employees;
+SELECT COUNT(*) FROM job_history;
+
+-- FULL OUTER JOIN
+SELECT *
+FROM employee e
+        ,department d
+WHERE e.dept_code(+) = d.dept_id(+);    -- (+) 기호로는 FULL JOIN 불가
+
+SELECT e.emp_name
+         ,d.dept_title
+FROM employee e
+        FULL OUTER JOIN department d
+        ON dept_code = d.dept_id;
+        
+        
+-- 데이터 사전 뷰
+SELECT *
+FROM user_tables
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
